@@ -63,11 +63,84 @@ router.post("/createproduct", upload.single("prodImg"), async (req, res) => {
 
   // res.json({ create: "createproduct page" });
 });
-router.patch("/updateproduct", (req, res) => {
-  res.json({ update: "updateproduct page" });
+router.patch("/updateproduct", upload.single("prodImg"), async (req, res) => {
+  // let { upd, id } = req.body;
+  // console.log(upd);
+  // res.json({ update: upd, id });
+  let { prodName, prodPrice, prodSnippet, prodDetails, id } = req.body;
+  // put all defined key from req.body to upd
+  let upd = {};
+  if (prodName) {
+    upd["prodName"] = prodName;
+  }
+  if (prodPrice) {
+    upd["prodPrice"] = prodPrice;
+  }
+  if (prodSnippet) {
+    upd["prodSnippet"] = prodSnippet;
+  }
+  if (prodDetails) {
+    upd["prodDetails"] = prodDetails;
+  }
+  console.log(upd);
+  if (req.file) {
+    // res.json({ res: "this request has a file", id, upd });
+    // get product from db using id
+    let toUpd = await product.findById(id);
+    // delete image from cloudinary using prodImg_id from toupd
+    let remImg = await cloudinary.uploader.destroy(toUpd.prodImg_id);
+    // upload new image to cloudinary
+    let newImg = await cloudinary.uploader.upload(req.file.path, {
+      folder: "ecombackend_product_2024",
+    });
+    // add prodImg_id and prodImg_url to upd
+    upd["prodImg_id"] = newImg.public_id;
+    upd["prodImg_url"] = newImg.secure_url;
+
+    //4. update to db
+    product
+      .findByIdAndUpdate(id, { $set: upd })
+      .then((ans) => {
+        res.json({ status: true });
+      })
+      .catch((err) => {
+        res.json({ status: false });
+      });
+  } else {
+    // res.json({ res: "this request doesn't have a file", upd, id});
+    product
+      .findByIdAndUpdate(id, {
+        $set: upd,
+      })
+      .then((ans) => {
+        res.json({ status: true });
+      })
+      .then((err) => {
+        res.json({ status: false });
+      });
+  }
+
+  // res.json({ update: "updateproduct page" });
 });
-router.delete("/deleteproduct", (req, res) => {
-  res.json({ delete: "deleteproduct page" });
+router.delete("/deleteproduct", async (req, res) => {
+  //? steps
+  //1. get id
+  let { id } = req.body;
+  //2. get product to delete from db
+  let toDel = await product.findById(id);
+  //3. delete from cloudinary using prodimg_id
+  let remImg = await cloudinary.uploader.destroy(toDel.prodImg_id);
+  //4.delete from db using id and send json response
+  product
+    .findByIdAndDelete(id)
+    .then((ans) => {
+      res.json(ans);
+    })
+    .catch((err) => {
+      res.json(err.message);
+    });
+
+  // res.json({ delete: "deleteproduct page" });
 });
 router.get("/single/:id", (req, res) => {
   res.json({ single: "singleproduct page" });
