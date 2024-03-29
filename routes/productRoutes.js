@@ -143,7 +143,29 @@ router.delete("/deleteproduct", async (req, res) => {
   // res.json({ delete: "deleteproduct page" });
 });
 router.get("/single/:id", (req, res) => {
-  res.json({ single: "singleproduct page" });
+  let { id } = req.params;
+  product
+    .findById(id)
+    .then((ans) => {
+      res.json(ans);
+    })
+    .catch((err) => {
+      res.json({ status: false });
+    });
+  // res.json({ single: "singleproduct page" });
+});
+router.post("/like", (req, res) => {
+  let { id, like } = req.body;
+  product
+    .findByIdAndUpdate(id, { $inc: { prodLikes: like } })
+    .then((ans) => {
+      res.json({ status: true });
+    })
+    .catch((err) => {
+      res.json({ status: false });
+    });
+  // res.json({ id, like });
+  // res.json({ prodlikes: "prodlikes page" });
 });
 router.get("*", (req, res) => {
   res.json({ error: "error invalid url" });
