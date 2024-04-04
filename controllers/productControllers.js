@@ -1,5 +1,5 @@
-const { product } = require("../../model/prodModel");
-const { cloudinary } = require("../../utils/cloudinary");
+const { product } = require("../model/prodModel");
+const { cloudinary } = require("../utils/cloudinary");
 
 const allproducts_get = (req, res) => {
   product
@@ -171,10 +171,6 @@ const productlike_post = (req, res) => {
   // res.json({ prodlikes: "prodlikes page" });
 };
 
-const errorpage = (req, res) => {
-  res.json({ error: "error invalid url" });
-};
-
 module.exports = {
   allproducts_get,
   createproduct_post,
@@ -182,5 +178,4 @@ module.exports = {
   deleteproduct,
   singleproduct_get,
   productlike_post,
-  errorpage,
 };
